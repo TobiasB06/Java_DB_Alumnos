@@ -5,16 +5,18 @@ import java.awt.Image;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel; 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Connection;
+import javax.swing.JOptionPane;
+        
 public final class login extends javax.swing.JFrame {
-
-    /**
-     * Creates new form login
-     */
+    
     public login() {
         initComponents();
         setImagelabel(imagenlogo,"src/imagenes/Colegio_logo.png");
+        
     }
-
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -170,7 +172,49 @@ public final class login extends javax.swing.JFrame {
     }//GEN-LAST:event_usuario_inputActionPerformed
 
     private void Iniciar_botonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_Iniciar_botonActionPerformed
-        // TODO add your handling code here:
+        String usuario=usuario_input.getText();
+        char[] passwordChars=password_input.getPassword();
+        String password = new String(passwordChars);
+        if(usuario.isEmpty()||password.isEmpty()){
+            JOptionPane.showMessageDialog(null,"Debe completar los datos");
+        }
+        else{
+         Conexion conexion = new Conexion();
+        Connection cnx = conexion.Conectar();
+        
+        if (cnx != null) {
+            try {
+
+                String sql = "SELECT * FROM usuarios WHERE Nombre_usuario = ? AND contraseña = ?";
+                PreparedStatement statement = cnx.prepareStatement(sql);
+                statement.setString(1, usuario);
+                statement.setString(2, password);
+
+                ResultSet resultSet = statement.executeQuery();
+
+                if (resultSet.next()) {
+                    // Usuario y contraseña correctos
+                    JOptionPane.showMessageDialog(null, "Inicio de sesión exitoso");
+                    menu menu1=new menu();
+                    menu1.setVisible(true);
+                    this.dispose();
+                } else {
+                    // Usuario o contraseña incorrectos
+                    JOptionPane.showMessageDialog(null, "Usuario o contraseña incorrectos");
+                }
+
+                // Cerrar los recursos
+                resultSet.close();
+                statement.close();
+                cnx.close();
+
+            } catch (Exception e) {
+                System.out.println("Error al ejecutar la consulta: " + e.getMessage());
+            }
+        } else {
+            JOptionPane.showMessageDialog(null, "Error al conectar con la base de datos");
+        }
+        }
     }//GEN-LAST:event_Iniciar_botonActionPerformed
 
     private void password_inputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_password_inputActionPerformed
